@@ -12,17 +12,17 @@ module.exports = app => {
     }
 
     const user = await knex('users')
-      .where({email: req.body.email})
+      .whereRaw("LOWER(email) = LOWER(?)", req.body.email)
       .first();
 
     if (user) {
       bcrypt.compare(req.body.password, user.password, (err, match) => {
 
         if (err || !match) {
-          return res.status(401).send('')
+          return res.status(401).send('Email ou senha errados');
         }
 
-        const payload = {id: user.id }
+        const payload = {id: user.id}
 
         res.status(200).send({name: user.name, email: user.email, token: jwt.sign(payload, token)});
       });
